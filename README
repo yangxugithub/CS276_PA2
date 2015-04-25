@@ -1,0 +1,17 @@
+Programming Assignment 2 starter code
+Query spelling correction
+
+for CS 276, Spring 2014, Stanford
+
+buildmodels.sh and runcorrector.sh form the interface
+
+Do not modify either buildmodels.sh or runcorrector.sh.
+For the actual code, feel free to add your own files if you wish.
+
+Note: 
+
+Run buildmodels.sh as:
+./buildmodels.sh <training corpus dir> <training edit1s file> <extra>(optional)
+
+Run run corrector.sh as:
+./runcorrector <uniform | empirical> <query file> <extra>(optional) <gold file>(optional)
