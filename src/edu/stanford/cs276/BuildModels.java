@@ -1,6 +1,5 @@
 package edu.stanford.cs276;
 
-
 public class BuildModels {
 
 	public static double MU = .05;
