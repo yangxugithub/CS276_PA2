@@ -2,7 +2,7 @@ package edu.stanford.cs276.util;
 
 import java.io.Serializable;
 
-public class Pair<A, B> implements Serializable{
+public class Pair<A, B> implements Serializable {
     private A first;
     private B second;
 
@@ -57,4 +57,21 @@ public class Pair<A, B> implements Serializable{
     public void setSecond(B second) {
     	this.second = second;
     }
+
+//	@Override
+//	public int compareTo(Pair o) {
+////		try {
+//			int a = (this.getFirst().toString()).compareTo((o.getFirst().toString()));
+//			int b = (this.getSecond().toString()).compareTo((o.getSecond().toString()));
+//			if (a==0 && b==0) {
+//				return 0;
+//			} else {
+//				return a;
+//			}
+////		} catch (ClassCastException e) {
+////			System.out
+////					.println("CLASSCAST EXCEPTION WHILE COMPARING PAIRS");
+////			return -1;
+////		}
+//	}
 }

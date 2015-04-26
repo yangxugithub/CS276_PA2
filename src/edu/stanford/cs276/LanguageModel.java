@@ -8,22 +8,53 @@ import java.io.FileReader;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
-import java.util.TreeMap;
+import java.util.Set;
 
 import edu.stanford.cs276.util.Pair;
 
-
+/**
+ * Without Bigram overlap, the LanguageModel File = 13MB
+ * With Bigram overlap, 135MB
+ * @author hemal
+ */
 public class LanguageModel implements Serializable {
 
 	private static LanguageModel lm_;
 	
-	private Map<String, Integer> unigram = new TreeMap<String, Integer>();
-	private Map<Pair, Integer> bigram = new TreeMap<Pair, Integer>();
+	private Map<String, Integer> unigram 
+	= new HashMap<String, Integer>();
 	
+	private Map<Pair<String, String>, Integer> bigram 
+	= new HashMap<Pair<String, String>, Integer>();
+	
+	private Map<String, Set<String>> bigramChars
+	= new HashMap<String, Set<String>>();
 	
 	private void addToUnigram (String token) {
 		unigram.compute(token, (k,v)->{
+			Integer vtemp = (v==null?1:(v+1));
+			return vtemp;
+		});
+		addToBigramChars(token);
+	}
+	
+	private void addToBigramChars(String token) {
+		for (int i = 0; i < token.length()-1; i++) {
+			String str = token.substring(i, i+2);
+			bigramChars.compute(str, (k,v)->{
+				Set<String> vtemp = (v==null?new HashSet<String>():v);
+				vtemp.add(token);
+				return vtemp;
+			});
+		}
+	}
+
+	private void addToBigram(String token1, String token2) {
+		Pair<String, String> p = new Pair<String, String>(token1, token2);
+		bigram.compute(p, (k,v)->{
 			Integer vtemp = (v==null?1:(v+1));
 			return vtemp;
 		});
@@ -41,13 +72,20 @@ public class LanguageModel implements Serializable {
 		System.out.println("Constructing dictionaries...");
 		File dir = new File(corpusFilePath);
 		for (File file : dir.listFiles()) {
-			if (".".equals(file.getName()) || "..".equals(file.getName())) {
+			if (".".equals(file.getName()) || "..".equals(file.getName()) || file.getName().startsWith(".")) {
 				continue; // Ignore the self and parent aliases.
 			}
-			System.out.printf("Reading data file %s ...\n", file.getName());
+			System.out.println("Reading data file "+file.getName()+" ...\n");
 			BufferedReader input = new BufferedReader(new FileReader(file));
 			String line = null;
 			while ((line = input.readLine()) != null) {
+				String[] tokens = line.split("\\s+");
+				
+				for (int i = 0; i < tokens.length-1; i++) {
+					addToUnigram(tokens[i]);
+					addToBigram(tokens[i],tokens[i+1]);
+				}
+				addToUnigram(tokens[tokens.length-1]);
 				
 			}
 			input.close();
@@ -55,6 +93,7 @@ public class LanguageModel implements Serializable {
 		System.out.println("Done.");
 	}
 	
+
 	// Loads the object (and all associated data) from disk
 	public static LanguageModel load() throws Exception {
 		try {
