@@ -24,6 +24,8 @@ public class LanguageModel implements Serializable {
 
 	private static LanguageModel lm_;
 	
+	private long T = 0;
+	
 	private Map<String, Integer> unigram 
 	= new HashMap<String, Integer>();
 	
@@ -34,6 +36,7 @@ public class LanguageModel implements Serializable {
 	= new HashMap<String, Set<String>>();
 	
 	private void addToUnigram (String token) {
+		T++;
 		unigram.compute(token, (k,v)->{
 			Integer vtemp = (v==null?1:(v+1));
 			return vtemp;
@@ -51,7 +54,20 @@ public class LanguageModel implements Serializable {
 			});
 		}
 	}
+	
+	public double getBigramProbability(String token1, 
+			String token2, float lambda) {
+		Pair<String, String> p = new Pair<String, String>(token1,token2);
+		double prob = lambda * getUnigramProbability(token2) +
+		 (1-lambda) * ((double)bigram.get(p))/unigram.get(token1);
+		return prob;
+	}
 
+	public double getUnigramProbability(String token) {
+		double result = ((double)unigram.get(token).intValue())/T;
+		return result;
+	}
+	
 	private void addToBigram(String token1, String token2) {
 		Pair<String, String> p = new Pair<String, String>(token1, token2);
 		bigram.compute(p, (k,v)->{
