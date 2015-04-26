@@ -8,17 +8,26 @@ import java.io.FileReader;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.util.Map;
+import java.util.TreeMap;
+
+import edu.stanford.cs276.util.Pair;
 
 
 public class LanguageModel implements Serializable {
 
 	private static LanguageModel lm_;
-	/* Feel free to add more members here.
-	 * You need to implement more methods here as needed.
-	 * 
-	 * Your code here ...
-	 */
 	
+	private Map<String, Integer> unigram = new TreeMap<String, Integer>();
+	private Map<Pair, Integer> bigram = new TreeMap<Pair, Integer>();
+	
+	
+	private void addToUnigram (String token) {
+		unigram.compute(token, (k,v)->{
+			Integer vtemp = (v==null?1:(v+1));
+			return vtemp;
+		});
+	}
 	
 	// Do not call constructor directly since this is a Singleton
 	private LanguageModel(String corpusFilePath) throws Exception {
@@ -39,9 +48,7 @@ public class LanguageModel implements Serializable {
 			BufferedReader input = new BufferedReader(new FileReader(file));
 			String line = null;
 			while ((line = input.readLine()) != null) {
-				/*
-				 * Your code here
-				 */
+				
 			}
 			input.close();
 		}
