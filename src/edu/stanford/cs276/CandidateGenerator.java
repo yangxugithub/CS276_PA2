@@ -1,8 +1,10 @@
 package edu.stanford.cs276;
 
 import java.io.Serializable;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Set;
 
 import edu.stanford.cs276.util.Pair;
@@ -31,11 +33,14 @@ public class CandidateGenerator implements Serializable {
 	
 	// Generate all candidates for the target query
 	public Set<String> getCandidates(String query) throws Exception {
-		Set<String> candidates = new HashSet<String>();	
-		/*
-		 * Your code here
-		 */
-		return candidates;
+		LanguageModel lm = LanguageModel.load();
+		String [] tokens = query.split("\\s+");
+		Map<String, Set<String>> candidates = new HashMap<String, Set<String>>();
+		for (int i=0; i<tokens.length;i++) {
+			candidates.put(tokens[i], lm.getCloseWords(tokens[i]));
+		}
+			
+		return null;
 	}
 
 

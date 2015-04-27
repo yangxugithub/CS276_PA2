@@ -8,10 +8,13 @@ import java.io.FileReader;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import edu.stanford.cs276.util.Pair;
 
@@ -22,6 +25,8 @@ import edu.stanford.cs276.util.Pair;
  */
 public class LanguageModel implements Serializable {
 
+	private static int THRESHOLD = 2;
+	
 	private static LanguageModel lm_;
 	
 	private long T = 0;
@@ -138,5 +143,43 @@ public class LanguageModel implements Serializable {
 			lm_ = new LanguageModel(corpusFilePath);
 		}
 		return lm_;
+	}
+
+	public Set<String> getCloseWords(String token) {
+		Set<String> result = new HashSet<String>();
+		
+		if (token.length() == 1) {
+			result.add(token);
+			return result;
+		}
+		int minIntersect = token.length()/THRESHOLD;
+
+		List<String> bigramlist = new ArrayList<String>();
+		for (int i = 0; i < token.length()-1; i++) {
+			String str = token.substring(i, i+2);
+			bigramlist.add(str);
+		}
+		
+		Map<String, Integer> candidates = new HashMap<String, Integer>();
+		
+		for (String bigram : bigramlist) {
+			bigramChars.get(bigram).forEach(candidate->{
+				if(candidate.length()>=token.length()-2 && candidate.length() <= token.length()+2) {
+					candidates.compute(candidate, (k,v)->{
+						Integer vtemp = (v==null?1:v++);
+						return vtemp;
+					});
+				}
+			});
+		}
+		
+		result = candidates
+				.entrySet()
+				.stream()
+				.filter(entry->entry.getValue()>=minIntersect)
+				.map(entry->entry.getKey())
+				.collect(Collectors.toSet());
+		
+		return result;
 	}
 }
