@@ -28,10 +28,10 @@ public class BuildModels {
 		System.out.println("training corpus: " + args[0]);
 
 		languageModel =  LanguageModel.create(trainingCorpus);
-//		noisyChannelModel = NoisyChannelModel.create(editsFile);
+		noisyChannelModel = NoisyChannelModel.create(editsFile);
 
 		// Save the models to disk
-//		noisyChannelModel.save();
+		noisyChannelModel.save();
 		languageModel.save();
 		
 		if ("extra".equals(extra)) {
