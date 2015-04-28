@@ -3,6 +3,7 @@ package edu.stanford.cs276;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
+import java.util.List;
 import java.util.Set;
 
 public class RunCorrector {
@@ -115,7 +116,8 @@ public class RunCorrector {
 		CandidateGenerator cg;
 		try {
 			cg = CandidateGenerator.get();
-			Set<String> candidates = cg.getCandidates(query);
+			List<String[]> candidates = cg.getCandidates(query);
+			
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
