@@ -3,6 +3,7 @@ package edu.stanford.cs276;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
+import java.util.Set;
 
 public class RunCorrector {
 
@@ -74,7 +75,7 @@ public class RunCorrector {
 		 */
 		while ((query = queriesFileReader.readLine()) != null) {
 			
-			String correctedQuery = query;
+			String correctedQuery = getCorrectedQuery(query);
 			/*
 			 * Your code here
 			 */
@@ -106,5 +107,19 @@ public class RunCorrector {
 		long endTime   = System.currentTimeMillis();
 		long totalTime = endTime - startTime;
 		// System.out.println("RUNNING TIME: "+totalTime/1000+" seconds ");
+	}
+
+
+	private static String getCorrectedQuery(String query) {
+
+		CandidateGenerator cg;
+		try {
+			cg = CandidateGenerator.get();
+			Set<String> candidates = cg.getCandidates(query);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		return null;
 	}
 }

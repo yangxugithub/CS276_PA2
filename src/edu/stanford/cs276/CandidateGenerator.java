@@ -31,10 +31,18 @@ public class CandidateGenerator implements Serializable {
 	public Set<String> getCandidates(String query) throws Exception {
 		LanguageModel lm = LanguageModel.load();
 		String [] tokens = query.split("\\s+");
+		if(tokens.length > 1) {
+			throw new Exception("Not Yet implemented");
+		}
+		
 		Map<String, Set<String>> candidates = new HashMap<String, Set<String>>();
+		
 		for (int i=0; i<tokens.length;i++) {
 			candidates.put(tokens[i], lm.getCloseWords(tokens[i]));
 		}
+		
+		
+		
 			
 		return null;
 	}
