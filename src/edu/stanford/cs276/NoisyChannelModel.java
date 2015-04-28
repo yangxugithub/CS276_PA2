@@ -51,7 +51,8 @@ public class NoisyChannelModel implements Serializable
                 ncm_ = (NoisyChannelModel) oisA.readObject();
                 oisA.close();
             }
-        } catch (Exception e)
+        } 
+        catch (Exception e)
         {
             throw new Exception(
                     "Unable to load noise channel model.  You may have not run build corrector");
@@ -74,10 +75,12 @@ public class NoisyChannelModel implements Serializable
         if (type.equals("empirical"))
         {
             ecm_ = this.empiricalCostModel;
-        } else if (type.equals("uniform"))
+        } 
+        else if (type.equals("uniform"))
         {
             ecm_ = this.uniformCostModel;
-        } else
+        } 
+        else
         {
             throw new Exception("Invalid noisy channel probability type "
                     + "- must be one of <uniform | empirical>");
