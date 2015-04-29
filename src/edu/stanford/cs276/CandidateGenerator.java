@@ -12,6 +12,7 @@ public class CandidateGenerator implements Serializable {
 
 
 	private static CandidateGenerator cg_;
+	public static final double param = 1.0d;
 
 	// Don't use the constructor since this is a Singleton instance
 	private CandidateGenerator() {}
@@ -31,7 +32,7 @@ public class CandidateGenerator implements Serializable {
 		' ',','};
 
 	// Generate all candidates for the target query
-	public List<String[]> getCandidates(String query) throws Exception {
+	public String getCorrectedQuery(String query) throws Exception {
 		LanguageModel lm = LanguageModel.load();
 		String [] tokens = query.split("\\s+");
 
@@ -41,24 +42,46 @@ public class CandidateGenerator implements Serializable {
 			candidates.put(tokens[i], lm.getCloseWords(tokens[i]));
 		}
 
-		List<String[]> results = new ArrayList<String[]>();
-		getCartesianProducts(candidates,results,new String[candidates.size()],0, tokens);
+//		List<String[]> results = new ArrayList<String[]>();
+		
 
-		return results;
+		return getCartesianProducts(candidates,new String[candidates.size()],0, tokens);
 	}
 
 
-	private void getCartesianProducts(Map<String, Set<String>> candidates,
-			List<String[]> results, String[] current, int depth, String[] tokens) {
+	private String getCartesianProducts(Map<String, Set<String>> candidates,
+			String[] current, int depth, String[] tokens) {
 
+		
+		String currentQuery = "";
+		double currentProb = 0.0d;
+		
+		
 		for (int i = 0; i < candidates.get(tokens[depth]).size(); i++) {
 			current[depth] = candidates.get(tokens[depth]).iterator().next();
-			if (depth < candidates.keySet().size() - 1){
-				getCartesianProducts(candidates, results, current, depth+1, tokens);
+			if (depth < candidates.keySet().size() - 1) {
+				getCartesianProducts(candidates, current, depth+1, tokens);
 			} else {
-				results.add(Arrays.copyOf(current,current.length));                
+				StringBuilder r = new StringBuilder("");
+				StringBuilder q = new StringBuilder("");
+				
+				Arrays.stream(tokens).sequential().forEach(st->q.append(st).append(" "));
+				Arrays.stream(current).sequential().forEach(st->r.append(st).append(" "));
+				
+				double [] prob = {Math.log10(RunCorrector.nsm.ecm_.editProbability(q.toString(), r.toString(), 1))};
+				Arrays.stream(current)
+						.sequential()
+						.forEach(st->prob[0]=prob[0]+ param * Math.log10(RunCorrector.languageModel.getUnigramProbability(st)));
+				if(prob[0] > currentProb) {
+					currentProb = prob[0];
+					currentQuery = r.toString();
+				}
+				
+//				results.add(Arrays.copyOf(current,current.length));
 			}
 		}
+		
+		return currentQuery;
 
 	}
 
