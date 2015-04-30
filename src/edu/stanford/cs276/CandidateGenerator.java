@@ -41,7 +41,7 @@ public class CandidateGenerator implements Serializable {
 		Map<String, Set<String>> candidates = new LinkedHashMap<String, Set<String>>();
 
 		for (int i=0; i<tokens.length;i++) {
-			candidates.put(tokens[i], lm.getCloseWords(tokens[i]));
+			candidates.put(tokens[i].trim(), lm.getCloseWords(tokens[i].trim()));
 		}
 		
 		String str = getCartesianProducts(candidates,new String[candidates.size()],0, tokens, query);
@@ -66,6 +66,7 @@ public class CandidateGenerator implements Serializable {
 				for (int i=0;i<=depth;i++){
 					distance = distance + UniformCostModel.getEditDistance(current[i], tokens[i]);
 					if(distance>2) {
+						current[depth] = null;
 						return null;
 					}
 				}

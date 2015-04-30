@@ -25,7 +25,7 @@ import edu.stanford.cs276.util.Pair;
  */
 public class LanguageModel implements Serializable {
 
-	private static int THRESHOLD = 4;
+	private static int THRESHOLD = 1;
 
 	private static LanguageModel lm_;
 
@@ -90,8 +90,9 @@ public class LanguageModel implements Serializable {
 	public double getBigramProbability(String token1, 
 			String token2, float lambda) {
 		Pair<Integer, Integer> p = new Pair<Integer, Integer>(tokenDict.get(token1),tokenDict.get(token2));
+		boolean b = bigram.containsKey(p);
 		double prob = lambda * getUnigramProbability(token2) +
-				(1-lambda) * ((double)(bigram.containsKey(p)?bigram.get(p):0.0))/unigram.get(tokenDict.get(token1));
+				(1-lambda) * ((double)(b?bigram.get(p):0.0d))/unigram.get(tokenDict.get(token1));
 		return prob;
 	}
 
@@ -190,6 +191,10 @@ public class LanguageModel implements Serializable {
 	public Set<String> getCloseWords(String token) {
 		Set<String> result = new TreeSet<String>();
 
+		if(token.equals("univesity")){
+			boolean b = true;
+		}
+		
 		if (token.length() == 1) {
 			result.add(token);
 			return result;
@@ -230,7 +235,7 @@ public class LanguageModel implements Serializable {
 		result = candidates
 				.entrySet()
 				.stream()
-				.filter(entry->entry.getValue()>=minIntersect)
+//				.filter(entry->entry.getValue()>=minIntersect)
 				.map(entry->entry.getKey())
 				.collect(Collectors.toSet());
 
