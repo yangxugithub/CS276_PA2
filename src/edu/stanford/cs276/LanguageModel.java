@@ -15,13 +15,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import edu.stanford.cs276.util.Pair;
 
 /**
- * Without Bigram overlap, the LanguageModel File = 13MB
- * With Bigram overlap, 135MB
  * @author hemal
  */
 public class LanguageModel implements Serializable {
@@ -74,11 +73,12 @@ public class LanguageModel implements Serializable {
 		}
 		return id;
 	}
-	
-	
+
+
 	private void addToBigramChars(String token) {
-		for (int i = 0; i < token.length()-1; i++) {
-			String str = token.substring(i, i+2);
+		String temp = "$"+token+"$";
+		for (int i = 0; i < temp.length()-1; i++) {
+			String str = temp.substring(i, i+2);
 			bigramChars.compute(str, (k,v)->{
 				Set<Integer> vtemp = (v==null?new HashSet<Integer>():v);
 				vtemp.add(tokenDict.get(token));
@@ -91,7 +91,7 @@ public class LanguageModel implements Serializable {
 			String token2, float lambda) {
 		Pair<Integer, Integer> p = new Pair<Integer, Integer>(tokenDict.get(token1),tokenDict.get(token2));
 		double prob = lambda * getUnigramProbability(token2) +
-				(1-lambda) * ((double)bigram.get(p))/unigram.get(tokenDict.get(token1));
+				(1-lambda) * ((double)(bigram.containsKey(p)?bigram.get(p):0.0))/unigram.get(tokenDict.get(token1));
 		return prob;
 	}
 
@@ -103,7 +103,7 @@ public class LanguageModel implements Serializable {
 	private void addToBigram(String token1, String token2) {
 		int id1 = getTokenId(token1);
 		int id2 = getTokenId(token2);
-		
+
 		Pair<Integer, Integer> p = new Pair<Integer, Integer>(id1, id2);
 		bigram.compute(p, (k,v)->{
 			Integer vtemp = (v==null?1:(v+1));
@@ -127,12 +127,14 @@ public class LanguageModel implements Serializable {
 				continue; // Ignore the self and parent aliases.
 			}
 			System.out.println("Reading data file "+file.getName()+" ...\n");
-//			System.out.println("Unigram Size" + unigram.size());
-//			System.out.println("Bigram Size" + bigram.size());
-//			System.out.println("Bigram Chars Size" + bigramChars.size());
+			//			System.out.println("Unigram Size" + unigram.size());
+			//			System.out.println("Bigram Size" + bigram.size());
+			//			System.out.println("Bigram Chars Size" + bigramChars.size());
 			BufferedReader input = new BufferedReader(new FileReader(file));
 			String line = null;
 			while ((line = input.readLine()) != null) {
+				line = line.replaceAll("_", " ");
+				line = line.trim();
 				String[] tokens = line.split("\\s+");
 
 				for (int i = 0; i < tokens.length-1; i++) {
@@ -186,37 +188,45 @@ public class LanguageModel implements Serializable {
 	}
 
 	public Set<String> getCloseWords(String token) {
-		Set<String> result = new HashSet<String>();
+		Set<String> result = new TreeSet<String>();
 
 		if (token.length() == 1) {
 			result.add(token);
 			return result;
 		}
 		int minIntersect = token.length()/THRESHOLD;
-
+		
+		Map<String, Integer> candidates = new TreeMap<String, Integer>();
+		String temp = "$"+token+"$";
 		List<String> bigramlist = new ArrayList<String>();
-		for (int i = 0; i < token.length()-1; i++) {
-			String str = token.substring(i, i+2);
+		for (int i = 0; i < temp.length()-1; i++) {
+			String str = temp.substring(i, i+2);
 			bigramlist.add(str);
 		}
-		
-//	boolean b = unigram.containsKey(tokenDict.get("quad"));
-		
-
-		Map<String, Integer> candidates = new TreeMap<String, Integer>();
 
 		for (String bigram : bigramlist) {
 			bigramChars.get(bigram).forEach(candidateInt->{
 				String candidate = revTokenDict.get(candidateInt); 
-						if(candidate.length()>=token.length()-2 && candidate.length() <= token.length()+2) {
-							candidates.compute(candidate, (k,v)->{
-								Integer vtemp = (v==null?1:v++);
-								return vtemp;
-							});
-						}
+				if(candidate.length()>=token.length()-2 
+						&& candidate.length() <= token.length()+2
+						&& UniformCostModel.getEditDistance(token, candidate)<=1
+						) {
+//					result.add(candidate);
+					candidates.compute(candidate, (k,v)->{
+						Integer vtemp = (v==null?1:(v+1));
+						return vtemp;
+					});
+				}
 			});
 		}
 
+//		result = candidates
+//				.entrySet()
+//				.stream()
+//				.filter(entry->entry.getValue()>=minIntersect)
+//				.map(entry->entry.getKey())
+//				.collect(Collectors.toSet());
+		
 		result = candidates
 				.entrySet()
 				.stream()

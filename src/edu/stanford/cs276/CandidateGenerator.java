@@ -1,18 +1,19 @@
 package edu.stanford.cs276;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
 public class CandidateGenerator implements Serializable {
 
 
-	private static CandidateGenerator cg_;
+	private static final float LAMBDA = 0.2f;
 	public static final double param = 1.0d;
+	
+	private static CandidateGenerator cg_;
 
 	// Don't use the constructor since this is a Singleton instance
 	private CandidateGenerator() {}
@@ -30,60 +31,69 @@ public class CandidateGenerator implements Serializable {
 		'o','p','q','r','s','t','u','v','w','x','y','z',
 		'0','1','2','3','4','5','6','7','8','9',
 		' ',','};
+	
 
 	// Generate all candidates for the target query
 	public String getCorrectedQuery(String query) throws Exception {
 		LanguageModel lm = LanguageModel.load();
 		String [] tokens = query.split("\\s+");
 
-		Map<String, Set<String>> candidates = new HashMap<String, Set<String>>();
+		Map<String, Set<String>> candidates = new LinkedHashMap<String, Set<String>>();
 
 		for (int i=0; i<tokens.length;i++) {
 			candidates.put(tokens[i], lm.getCloseWords(tokens[i]));
 		}
-
-//		List<String[]> results = new ArrayList<String[]>();
 		
-
-		return getCartesianProducts(candidates,new String[candidates.size()],0, tokens);
+		String str = getCartesianProducts(candidates,new String[candidates.size()],0, tokens, query);
+		currentQuery = "";
+		currentProb = -1.0d/0;
+		return str.trim();
 	}
 
+	String currentQuery = "";
+	double currentProb = -1.0d/0;
+	
 
 	private String getCartesianProducts(Map<String, Set<String>> candidates,
-			String[] current, int depth, String[] tokens) {
+			String[] current, int depth, String[] tokens, String q) {
+		Iterator<String> iter = candidates.get(tokens[depth]).iterator();
+		
 
-		
-		String currentQuery = "";
-		double currentProb = 0.0d;
-		
-		
-		for (int i = 0; i < candidates.get(tokens[depth]).size(); i++) {
-			current[depth] = candidates.get(tokens[depth]).iterator().next();
+		while(iter.hasNext()) {
+			current[depth] = iter.next();
 			if (depth < candidates.keySet().size() - 1) {
-				getCartesianProducts(candidates, current, depth+1, tokens);
+				int distance = 0;
+				for (int i=0;i<=depth;i++){
+					distance = distance + UniformCostModel.getEditDistance(current[i], tokens[i]);
+					if(distance>2) {
+						return null;
+					}
+				}
+				getCartesianProducts(candidates, current, depth+1, tokens, q);
 			} else {
 				StringBuilder r = new StringBuilder("");
-				StringBuilder q = new StringBuilder("");
 				
-				Arrays.stream(tokens).sequential().forEach(st->q.append(st).append(" "));
 				Arrays.stream(current).sequential().forEach(st->r.append(st).append(" "));
 				
-				double [] prob = {Math.log10(RunCorrector.nsm.ecm_.editProbability(q.toString(), r.toString(), 1))};
-				Arrays.stream(current)
-						.sequential()
-						.forEach(st->prob[0]=prob[0]+ param * Math.log10(RunCorrector.languageModel.getUnigramProbability(st)));
-				if(prob[0] > currentProb) {
-					currentProb = prob[0];
-					currentQuery = r.toString();
+				if (UniformCostModel.getEditDistance(r.toString().trim(), q.toString().trim()) > 2) {
+					return null;
 				}
 				
-//				results.add(Arrays.copyOf(current,current.length));
+				
+				double prob = Math.log10(RunCorrector.nsm.ecm_.editProbability(q.toString(), r.toString(), 1));
+				prob=prob+ param * Math.log10(RunCorrector.languageModel.getUnigramProbability(current[0]));
+				for(int i=0; i<current.length-2;i++) {
+					prob = prob + param * Math.log10(RunCorrector.languageModel.getBigramProbability(current[i], current[i+1], LAMBDA));
+				}
+				
+				if(prob > currentProb) {
+					currentProb = prob;
+					currentQuery = r.toString();
+				}
 			}
 		}
 		
-		return currentQuery;
-
+		String resultQuery = currentQuery;
+		return resultQuery;
 	}
-
-
 }

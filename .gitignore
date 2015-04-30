@@ -1,1 +1,7 @@
 /bin/
+/hs_err_pid17378.log
+/hs_err_pid19893.log
+/hs_err_pid6826.log
+/languageModel
+/noisyChannel
+/.gitignore

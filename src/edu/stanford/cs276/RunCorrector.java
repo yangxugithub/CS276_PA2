@@ -3,12 +3,6 @@ package edu.stanford.cs276;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
 
 public class RunCorrector {
 
@@ -110,7 +104,8 @@ public class RunCorrector {
 		queriesFileReader.close();
 		long endTime   = System.currentTimeMillis();
 		long totalTime = endTime - startTime;
-		// System.out.println("RUNNING TIME: "+totalTime/1000+" seconds ");
+		System.out.println("RUNNING TIME: "+totalTime/1000+" seconds ");
+		System.out.println(100.0d * yourCorrectCount / totalCount);
 	}
 
 
@@ -122,23 +117,8 @@ public class RunCorrector {
 			String result = cg.getCorrectedQuery(query);
 			return result;
 			
-//			List<String[]> candidates = 
-//			Map<String,Double> candidatesMap = new HashMap<String,Double>();
-//			for (int i=0; i< candidates.size(); i++) {
-//				StringBuilder r = new StringBuilder("");
-//				Arrays.stream(candidates.get(i)).sequential().forEach(st->r.append(st).append(" "));
-//				double [] prob = {Math.log10(nsm.ecm_.editProbability(query, r.toString(), 1))};
-//				Arrays.stream(candidates
-//						.get(i))
-//						.sequential()
-//						.forEach(st->prob[0]=prob[0]+ param * Math.log10(languageModel.getUnigramProbability(st)));
-//				candidatesMap.put(r.toString(), prob[0]);
-//			}
-//			Comparator<Entry<String, Double>> comp = (e1,e2)->e2.getValue().compareTo(e1.getValue()); 
-//			Entry<String, Double> k = candidatesMap.entrySet().stream().sorted(comp).findFirst().get();
-//			return k.getKey();
 		} catch (Exception e) {
-			e.printStackTrace();
+//			e.printStackTrace();
 			return null;
 		}
 		

@@ -21,20 +21,21 @@ public class Pair<A, B> implements Serializable {
     }
 
     @Override
-	public boolean equals(Object other) {
-    	if (other instanceof Pair) {
-    		Pair otherPair = (Pair) other;
+    public boolean equals(Object obj) {
+    	if (obj instanceof Pair) {
+    		Pair otherPair = (Pair) obj;
     		return 
-    		((  this.first == otherPair.first ||
-    			( this.first != null && otherPair.first != null &&
-    			  this.first.equals(otherPair.first))) &&
-    		 (	this.second == otherPair.second ||
-    			( this.second != null && otherPair.second != null &&
-    			  this.second.equals(otherPair.second))) );
+    	    		((  this.first == otherPair.first ||
+    	    			( this.first != null && otherPair.first != null &&
+    	    			  ((Integer)(this.first)).intValue()==((Integer)otherPair.first).intValue())) &&
+    	    		 (	this.second == otherPair.second ||
+    	    			( this.second != null && otherPair.second != null &&
+    	    			((Integer)(this.second)).intValue()==((Integer)otherPair.second).intValue()))
+    	    			   );
     	}
-
+    	
     	return false;
-    }
+    };
 
     @Override
 	public String toString()
@@ -60,7 +61,7 @@ public class Pair<A, B> implements Serializable {
 
 //	@Override
 //	public int compareTo(Pair o) {
-////		try {
+//		try {
 //			int a = (this.getFirst().toString()).compareTo((o.getFirst().toString()));
 //			int b = (this.getSecond().toString()).compareTo((o.getSecond().toString()));
 //			if (a==0 && b==0) {
@@ -68,10 +69,10 @@ public class Pair<A, B> implements Serializable {
 //			} else {
 //				return a;
 //			}
-////		} catch (ClassCastException e) {
-////			System.out
-////					.println("CLASSCAST EXCEPTION WHILE COMPARING PAIRS");
-////			return -1;
-////		}
+//		} catch (ClassCastException e) {
+//			System.out
+//					.println("CLASSCAST EXCEPTION WHILE COMPARING PAIRS");
+//			return -1;
+//		}
 //	}
 }
