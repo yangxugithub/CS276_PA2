@@ -104,8 +104,8 @@ public class RunCorrector {
 		queriesFileReader.close();
 		long endTime   = System.currentTimeMillis();
 		long totalTime = endTime - startTime;
-		System.out.println("RUNNING TIME: "+totalTime/1000+" seconds ");
-		System.out.println(100.0d * yourCorrectCount / totalCount);
+		//System.out.println("RUNNING TIME: "+totalTime/1000+" seconds ");
+		//System.out.println(100.0d * yourCorrectCount / totalCount);
 	}
 
 
