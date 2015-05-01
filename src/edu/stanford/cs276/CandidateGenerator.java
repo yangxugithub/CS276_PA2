@@ -18,7 +18,7 @@ public class CandidateGenerator implements Serializable {
 	// Don't use the constructor since this is a Singleton instance
 	private CandidateGenerator() {}
 
-	public static CandidateGenerator get() throws Exception{
+	public static CandidateGenerator get() throws Exception {
 		if (cg_ == null ){
 			cg_ = new CandidateGenerator();
 		}
@@ -83,7 +83,7 @@ public class CandidateGenerator implements Serializable {
 				
 				double prob = Math.log10(RunCorrector.nsm.ecm_.editProbability(q.toString(), r.toString(), 1));
 				prob=prob+ param * Math.log10(RunCorrector.languageModel.getUnigramProbability(current[0]));
-				for(int i=0; i<current.length-2;i++) {
+				for(int i=0; i<current.length-1;i++) {
 					prob = prob + param * Math.log10(RunCorrector.languageModel.getBigramProbability(current[i], current[i+1], LAMBDA));
 				}
 				

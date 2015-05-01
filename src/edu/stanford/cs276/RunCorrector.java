@@ -74,10 +74,6 @@ public class RunCorrector {
 		while ((query = queriesFileReader.readLine()) != null) {
 			
 			String correctedQuery = getCorrectedQuery(query);
-			/*
-			 * Your code here
-			 */
-			
 			
 			if ("extra".equals(extra)) {
 				/*
@@ -115,7 +111,7 @@ public class RunCorrector {
 			cg = CandidateGenerator.get();
 			
 			String result = cg.getCorrectedQuery(query);
-			return result;
+			return result==null?query:result;
 			
 		} catch (Exception e) {
 //			e.printStackTrace();
