@@ -3,17 +3,40 @@ package edu.stanford.cs276;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
+import java.io.InputStreamReader;
 
 public class RunCorrector {
 
 	public static LanguageModel languageModel;
 	public static NoisyChannelModel nsm;
+
+	public static void main1(String[] args) throws Exception {
+		boolean b = true;
+		
+		
+		while(b) {
+//			
+			BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+			String input;
+//			
+			while((input=br.readLine())!=null){
+				if(input.endsWith("c")) 
+					b = false;
+				RunCorrector.main1(args);
+			}
+			
+			
+		}
+		
+//		Thread.sleep(10*1000);
+	}
+	
 	
 
 	public static void main(String[] args) throws Exception {
-		
+
 		long startTime = System.currentTimeMillis();
-		
+
 		// Parse input arguments
 		String uniformOrEmpirical = null;
 		String queryFilePath = null;
@@ -41,40 +64,40 @@ public class RunCorrector {
 			goldFilePath = args[3];
 		}
 		else {System.err.println(
-					"Invalid arguments.  Argument count must be 2, 3 or 4" +
-					"./runcorrector <uniform | empirical> <query file> \n" + 
-					"./runcorrector <uniform | empirical> <query file> <gold file> \n" +
-					"./runcorrector <uniform | empirical> <query file> <extra> \n" +
-					"./runcorrector <uniform | empirical> <query file> <extra> <gold file> \n" +
-					"SAMPLE: ./runcorrector empirical data/queries.txt \n" +
-					"SAMPLE: ./runcorrector empirical data/queries.txt data/gold.txt \n" +
-					"SAMPLE: ./runcorrector empirical data/queries.txt extra \n" +
-					"SAMPLE: ./runcorrector empirical data/queries.txt extra data/gold.txt \n");
-			return;
+				"Invalid arguments.  Argument count must be 2, 3 or 4" +
+						"./runcorrector <uniform | empirical> <query file> \n" + 
+						"./runcorrector <uniform | empirical> <query file> <gold file> \n" +
+						"./runcorrector <uniform | empirical> <query file> <extra> \n" +
+						"./runcorrector <uniform | empirical> <query file> <extra> <gold file> \n" +
+						"SAMPLE: ./runcorrector empirical data/queries.txt \n" +
+						"SAMPLE: ./runcorrector empirical data/queries.txt data/gold.txt \n" +
+						"SAMPLE: ./runcorrector empirical data/queries.txt extra \n" +
+				"SAMPLE: ./runcorrector empirical data/queries.txt extra data/gold.txt \n");
+		return;
 		}
-		
+
 		if (goldFilePath != null ){
 			goldFileReader = new BufferedReader(new FileReader(new File(goldFilePath)));
 		}
-		
+
 		// Load models from disk
 		languageModel = LanguageModel.load(); 
 		nsm = NoisyChannelModel.load();
 		BufferedReader queriesFileReader = new BufferedReader(new FileReader(new File(queryFilePath)));
 		nsm.setProbabilityType(uniformOrEmpirical);
-		
+
 		int totalCount = 0;
 		int yourCorrectCount = 0;
 		String query = null;
-		
+
 		/*
 		 * Each line in the file represents one query.  We loop over each query and find
 		 * the most likely correction
 		 */
 		while ((query = queriesFileReader.readLine()) != null) {
-			
+
 			String correctedQuery = getCorrectedQuery(query);
-			
+
 			if ("extra".equals(extra)) {
 				/*
 				 * If you are going to implement something regarding to running the corrector, 
@@ -84,7 +107,7 @@ public class RunCorrector {
 				 * implementations without the "extra" parameter.
 				 */	
 			}
-			
+
 
 			// If a gold file was provided, compare our correction to the gold correction
 			// and output the running accuracy
@@ -100,23 +123,26 @@ public class RunCorrector {
 		queriesFileReader.close();
 		long endTime   = System.currentTimeMillis();
 		long totalTime = endTime - startTime;
-		//System.out.println("RUNNING TIME: "+totalTime/1000+" seconds ");
-		//System.out.println(100.0d * yourCorrectCount / totalCount);
+		System.out.println("RUNNING TIME: "+totalTime/1000+" seconds ");
+		System.out.println(100.0d * yourCorrectCount / totalCount);
 	}
 
 
 	private static String getCorrectedQuery(String query) {
 		CandidateGenerator cg;
 		try {
-			cg = CandidateGenerator.get();
-			
-			String result = cg.getCorrectedQuery(query);
-			return result==null?query:result;
-			
+			String result = null;
+
+//			if(query.contains("mw")) {
+				cg = CandidateGenerator.get();
+				result = cg.getCorrectedQuery(query); 
+//			}
+			return (result==null||result.length()==0)?query:result.trim();
+
 		} catch (Exception e) {
-//			e.printStackTrace();
+			//			e.printStackTrace();
 			return null;
 		}
-		
+
 	}
 }

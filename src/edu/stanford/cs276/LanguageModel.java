@@ -25,6 +25,8 @@ import edu.stanford.cs276.util.Pair;
  */
 public class LanguageModel implements Serializable {
 
+	private static final int WORDEDITDIST = 1;
+
 	private static int THRESHOLD = 1;
 
 	private static LanguageModel lm_;
@@ -90,14 +92,17 @@ public class LanguageModel implements Serializable {
 	public double getBigramProbability(String token1, 
 			String token2, float lambda) {
 		Pair<Integer, Integer> p = new Pair<Integer, Integer>(tokenDict.get(token1),tokenDict.get(token2));
+		
 		boolean b = bigram.containsKey(p);
 		double prob = lambda * getUnigramProbability(token2) +
-				(1-lambda) * ((double)(b?bigram.get(p):0.0d))/unigram.get(tokenDict.get(token1));
+				(1-lambda) * (b?(((double)bigram.get(p))/unigram.get(tokenDict.get(token1))):0.0d);
 		return prob;
 	}
 
 	public double getUnigramProbability(String token) {
-		double result = ((double)unigram.get(tokenDict.get(token)).intValue())/T;
+		boolean b = unigram.containsKey(tokenDict.get(token));
+		
+		double result = (b?(double)unigram.get(tokenDict.get(token)).intValue()+1:1)/(T+1);
 		return result;
 	}
 
@@ -151,6 +156,11 @@ public class LanguageModel implements Serializable {
 		System.out.println("Done.");
 	}
 
+	
+	public boolean unigramExists(String token) {
+		boolean b = tokenDict.containsKey(token); 
+		return b;
+	}
 
 	private void createRevDict() {
 		tokenDict.forEach((k,v)->{
@@ -191,14 +201,11 @@ public class LanguageModel implements Serializable {
 	public Set<String> getCloseWords(String token) {
 		Set<String> result = new TreeSet<String>();
 
-		if(token.equals("univesity")){
-			boolean b = true;
-		}
-		
 		if (token.length() == 1) {
 			result.add(token);
 			return result;
 		}
+		
 		int minIntersect = token.length()/THRESHOLD;
 		
 		Map<String, Integer> candidates = new TreeMap<String, Integer>();
@@ -214,7 +221,7 @@ public class LanguageModel implements Serializable {
 				String candidate = revTokenDict.get(candidateInt); 
 				if(candidate.length()>=token.length()-2 
 						&& candidate.length() <= token.length()+2
-						&& UniformCostModel.getEditDistance(token, candidate)<=1
+						&& UniformCostModel.getEditDistance(token, candidate)<=WORDEDITDIST
 						) {
 //					result.add(candidate);
 					candidates.compute(candidate, (k,v)->{
@@ -239,6 +246,14 @@ public class LanguageModel implements Serializable {
 				.map(entry->entry.getKey())
 				.collect(Collectors.toSet());
 
+		if(result.size()==0) {
+			result.add(token);
+		}
 		return result;
+	}
+
+	public boolean bigramExists(String one, String two) {
+		Pair p = new Pair(tokenDict.get(one),tokenDict.get(two));
+		return bigram.containsKey(p);
 	}
 }

@@ -11,7 +11,7 @@ public class UniformCostModel implements EditCostModel
 //        ' ',','};
     
     public static final double ProbDiff = 0.01;
-    public static final double ProbSame = 0.9;
+    public static final double ProbSame = 0.95;
     public static int getMinValue(int... nums)
     {
 //        int min = Integer.MAX_VALUE;
