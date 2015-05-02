@@ -63,7 +63,7 @@ public class UniformCostModel implements EditCostModel
         }
         return H[srcLength + 1][dstLength + 1];
     }
-   
+  
     @Override
     public double editProbability(String original, String R, int distance)
     {
