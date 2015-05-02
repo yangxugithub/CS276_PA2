@@ -287,13 +287,16 @@ public class EmpiricalCostModel implements EditCostModel
          int i = srcLength + 1;
          int j = dstLength + 1;
          int loopCount = 0;
-         while ( i > 1 || j > 1 && loopCount <= 1000)
+         while ( (i > 1 || j > 1) && loopCount <= 1000)
          {
              String editType = "";
              if (Path[i][j] == "trs")
              {
                  editType += src.charAt(i - 3);
                  editType += src.charAt(i - 2);
+                 // editType += '|';
+                 // editType += dst.charAt(j - 2);
+                 // editType += dst.charAt(j - 3);
                  i -= 2;
                  j -= 2;
                  System.out.println( "Trans : " + editType);
@@ -330,6 +333,28 @@ public class EmpiricalCostModel implements EditCostModel
                  i -= 1;
                  j -= 1;
                  System.out.println("match");
+             }
+             else
+             {
+                 System.out.println("find no edit type");
+                 System.out.println("i = "+i+", j= "+j);
+                 // del at head
+                 if (i > 1)
+                 {
+                     editType += '&';
+                     editType += src.charAt(0);
+                     edits.add("Del" + editType);
+                     System.out.println("Del: " + editType);
+                 }
+                 // ins at head
+                 else
+                 {
+                     editType += '&';
+                     editType += dst.charAt(0);
+                     edits.add("Ins" + editType);
+                     System.out.println("Ins: " + editType);
+                 }
+                 break;
              }
              loopCount += 1;
          }
