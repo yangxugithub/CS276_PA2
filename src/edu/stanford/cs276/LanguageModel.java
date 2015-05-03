@@ -105,8 +105,8 @@ public class LanguageModel implements Serializable {
 	public double getUnigramProbability(String token) {
 		boolean b = unigram.containsKey(tokenDict.get(token));
 		
-//		double result = ((b?(double)unigram.get(tokenDict.get(token)).intValue()+1.0d:0.0d)+1)/(T+1);
-		double result = (b?(double)unigram.get(tokenDict.get(token)).intValue()+1:1)/(T+1);
+		double result = ((b?(double)unigram.get(tokenDict.get(token)).intValue()+unigramSmoothing:0.0d)+unigramSmoothing)/(T+unigram.size());
+//		double result = (b?(double)unigram.get(tokenDict.get(token)).intValue()+1:1)/(T+1);
 		return result;
 	}
 
@@ -162,7 +162,7 @@ public class LanguageModel implements Serializable {
 
 	
 	public boolean unigramExists(String token) {
-		boolean b = tokenDict.containsKey(token); 
+		boolean b = tokenDict.containsKey(token) && unigram.containsKey(tokenDict.get(token));
 		return b;
 	}
 
@@ -246,7 +246,7 @@ public class LanguageModel implements Serializable {
 		result = candidates
 				.entrySet()
 				.stream()
-//				.filter(entry->entry.getValue()>=minIntersect)
+				.filter(entry->entry.getValue()>=minIntersect)
 				.map(entry->entry.getKey())
 				.collect(Collectors.toSet());
 
@@ -260,4 +260,10 @@ public class LanguageModel implements Serializable {
 		Pair p = new Pair(tokenDict.get(one),tokenDict.get(two));
 		return bigram.containsKey(p);
 	}
+
+	public int getUnigramCount(String one) {
+		Integer x = unigram.get(tokenDict.get(one));
+		return x;
+	}
+
 }

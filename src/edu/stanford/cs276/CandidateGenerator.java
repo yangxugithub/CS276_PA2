@@ -93,21 +93,18 @@ public class CandidateGenerator implements Serializable {
 						currentProb = -1.0d/0;
 					}
 				}
-				
-				
 			}
-
 		}
-
 		return result;
 	}
 
 	private String[] processPair(String one, String two, String[] origTokens,
 			int i, int j, LanguageModel lm) {
 		
-		if(!lm.unigramExists(one) || !lm.unigramExists(two) || !lm.bigramExists(one,two)) {
+		if(!lm.unigramExists(one) || lm.getUnigramCount(one)<Config.unigramThreshold
+				|| !lm.unigramExists(two) || lm.getUnigramCount(two)<Config.unigramThreshold
+				|| !lm.bigramExists(one,two)) {
 			return null;
-			
 		}
 		String[] result = new String [origTokens.length+1];
 		for(int x=0; x<i;x++) {
@@ -121,9 +118,9 @@ public class CandidateGenerator implements Serializable {
 		return result;
 	}
 
-	public static void main(String[] args) {
-		new CandidateGenerator().handleSpaceInserts(null, null, null, null, new String []{"hemal","Thakkar"});
-	}
+//	public static void main(String[] args) {
+//		new CandidateGenerator().handleSpaceInserts(null, null, null, null, new String []{"hemal","Thakkar"});
+//	}
 
 	private Map<String, Object> handleSpaceDeletes (String query, String str1, double prob1, final Map<String, Set<String>> candidates, 
 			LanguageModel lm, String[] origTokens) {
