@@ -25,7 +25,7 @@ public class NoisyChannelModel implements Serializable
     // Don't call the constructor directly (singleton instance)
     private NoisyChannelModel(String editsFile) throws Exception
     {
-//        empiricalCostModel = new EmpiricalCostModel(editsFile);
+        empiricalCostModel = new EmpiricalCostModel(editsFile);
         uniformCostModel = new UniformCostModel();
     }
 
