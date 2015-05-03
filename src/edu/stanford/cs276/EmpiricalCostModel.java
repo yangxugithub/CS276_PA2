@@ -21,6 +21,8 @@ public class EmpiricalCostModel implements EditCostModel
     HashMap<String, Integer> InsCounter = new HashMap<String, Integer>();
     HashMap<String, Integer> SubCounter = new HashMap<String, Integer>();
     HashMap<String, Integer> TransCounter = new HashMap<String, Integer>();
+    
+    boolean Debug = true;
 //    Integer A =÷ CandidateGenerator.alphabet.length;
 //    String FileName = "tmpLog.txt";
 //    FileWriter LogWriter; 
@@ -32,14 +34,6 @@ public class EmpiricalCostModel implements EditCostModel
     // trans counter
     public void UpdateCounterOfSubOrTrans(String noisy, String clean)
     {
-//        try
-//        {
-//            LogWriter.write("noisy = "+noisy + ", clean = " + clean + "\n");
-//        } catch (IOException e)
-//        {
-//            // TODO Auto-generated catch block
-//            e.printStackTrace();
-//        }
         int i = 0;
         for (i = 0; i < noisy.length(); i++)
         {
@@ -56,6 +50,10 @@ public class EmpiricalCostModel implements EditCostModel
         {
             tmpKey += noisy.charAt(i);
             tmpKey += clean.charAt(i);
+            if (Debug)
+            {
+                System.out.println("Sub: tmpKey = "+tmpKey);
+            }
             if (SubCounter.containsKey(tmpKey))
             {
                 Integer tmpValue = SubCounter.get(tmpKey);
@@ -71,6 +69,10 @@ public class EmpiricalCostModel implements EditCostModel
         {
             tmpKey += clean.charAt(i);
             tmpKey += clean.charAt(i + 1);
+            if (Debug)
+            {
+                System.out.println("Trans: tmpKey = "+tmpKey);
+            }
             if (TransCounter.containsKey(tmpKey))
             {
                 Integer tmpValue = TransCounter.get(tmpKey);
@@ -86,14 +88,6 @@ public class EmpiricalCostModel implements EditCostModel
     // noisy is one letter longer
     public void UpdateCounterIns(String noisy, String clean)
     {
-//        try
-//        {
-//            LogWriter.write("noisy = "+noisy + ", clean = " + clean + "\n");
-//        } catch (IOException e)
-//        {
-//            // TODO Auto-generated catch block
-//            e.printStackTrace();
-//        }
         int i = 0;
         String tmpKey = "", tmpKey2 = "";
         boolean found = false;
@@ -119,6 +113,11 @@ public class EmpiricalCostModel implements EditCostModel
             {
                 InsCounter.put(tmpKey, 1);
             }
+            if (Debug)
+            {
+                System.out.println("Ins: tmpKey = "+tmpKey);
+            }
+            
             return;
         }
         if (i - 1 >= 0)
@@ -153,7 +152,11 @@ public class EmpiricalCostModel implements EditCostModel
         {
             InsCounter.put(tmpKey, 1);
         }
-
+        if (Debug)
+        {
+            System.out.println("Ins: tmpKey = "+tmpKey);
+            System.out.println("Ins: tmpKey2 = "+tmpKey2);
+        }
         if (tmpKey2.length() == 0)
         {
             return;
@@ -173,7 +176,7 @@ public class EmpiricalCostModel implements EditCostModel
     public void UpdateCounterDel(String noisy, String clean)
     {
         int i = 0;
-        String tmpKey = "", tmpKey2 = "";
+        String tmpKey = "";
         for (i = 0; i < noisy.length(); i++)
         {
             if (noisy.charAt(i) != clean.charAt(i))
@@ -199,6 +202,10 @@ public class EmpiricalCostModel implements EditCostModel
         else
         {
             DelCounter.put(tmpKey, 1);
+        }
+        if (Debug)
+        {
+            System.out.println("Del: tmpKey = "+tmpKey);
         }
     }
 
@@ -305,10 +312,10 @@ public class EmpiricalCostModel implements EditCostModel
 
         List<String> edits = GetEditsByBackTracking(src, dst, Path);
 
-        if (edits.size() != H[srcLength + 1][dstLength + 1])
-        {
-            System.out.println("!!!!! edits found not equal to distance!");
-        }
+//        if (edits.size() != H[srcLength + 1][dstLength + 1])
+//        {
+//            System.out.println("!!!!! edits found not equal to distance!");
+//        }
 
         return edits;
     }
@@ -468,7 +475,7 @@ public class EmpiricalCostModel implements EditCostModel
             String clean = lineSc.next();
             if (noisy.compareTo(clean) != 0)
             {
-    //            System.out.println("noisy = "+noisy + ", clean = " + clean + "\n");
+                System.out.println("noisy = "+noisy + ", clean = " + clean + "\n");
                 if (noisy.length() == clean.length())
                 {
                     UpdateCounterOfSubOrTrans(noisy, clean);
@@ -495,67 +502,131 @@ public class EmpiricalCostModel implements EditCostModel
     @Override
     public double editProbability(String original, String R, int distance)
     {
-        List<String> edits = GetEdits(R, original);
-        double probEntire = 0.0;
+        if (Debug)
+        {
+            System.out.println("----------------------------------------------------");
+            System.out.println("original = " + original + ", R = " + R +"*");
+        }
+        List<String> edits = GetEdits(R, original);        
+        double probEntire = 1.0;
         for (String edit : edits)
         {
+            if (Debug)
+            {
+                System.out.println("edit = " + edit);
+            }
             String editType = edit.substring(0, 3);
             String editMove = edit.substring(3);
             double probEdit = 0.0;
-            if (editType == "Trs")
+            if (editType.compareTo("Trs") == 0)
             {
+                if (Debug)
+                {
+                    System.out.println("Trans:");                    
+                }
                 if (TransCounter.containsKey(editMove))
                 {
                     Integer numerator = TransCounter.get(editMove);
                     Integer denominator = BiGramCounter.get(editMove);
                     probEdit = (numerator + 1) / ((denominator + BiGramCounter.size()) * 1.0);
+                    if (Debug)
+                    {
+                        System.out.println("numerator = " + numerator + ", denominator = " + denominator);
+                        System.out.println("probEdit =" + probEdit);
+                    }
                 }
                 else
                 {
                     probEdit = 1 / (BiGramCounter.size() * 1.0);
+                    if (Debug)
+                    {
+                        System.out.println("Key not found, probEdit =" + probEdit);
+                    }
                 }
             }
-            else if (editType == "Sub")
+            else if (editType.compareTo("Sub") == 0)
             {
+                if (Debug)
+                {
+                    System.out.println("Sub:");                    
+                }
                 if (SubCounter.containsKey(editMove))
                 {
                     Integer numerator = SubCounter.get(editMove);
                     Integer denominator = UniGramCounter.get(editMove.charAt(1));
                     probEdit = (numerator + 1) / ((denominator + UniGramCounter.size()) * 1.0);
+                    if (Debug)
+                    {
+                        System.out.println("numerator = " + numerator + ", denominator = " + denominator);
+                        System.out.println("probEdit =" + probEdit);
+                    }
                 }
                 else
                 {
                     probEdit = 1 / (UniGramCounter.size() * 1.0);
+                    if (Debug)
+                    {
+                        System.out.println("Key not found, probEdit =" + probEdit);
+                    }
                 }
             }
-            else if (editType == "Del")
+            else if (editType.compareTo("Del") == 0)
             {
+                if (Debug)
+                {
+                    System.out.println("Del:");                    
+                }
                 if (DelCounter.containsKey(editMove))
                 {
                     Integer numerator = DelCounter.get(editMove);
                     Integer denominator = BiGramCounter.get(editMove);
                     probEdit = (numerator + 1) / ((denominator + BiGramCounter.size()) * 1.0);
+                    if (Debug)
+                    {
+                        System.out.println("numerator = " + numerator + ", denominator = " + denominator);
+                        System.out.println("probEdit =" + probEdit);
+                    }
                 }
                 else
                 {
                     probEdit = 1 / (BiGramCounter.size() * 1.0);
+                    if (Debug)
+                    {
+                        System.out.println("Key not found, probEdit =" + probEdit);
+                    }
                 }
             }
-            else if (editType == "Ins")
+            else if (editType.compareTo("Ins") == 0)
             {
+                if (Debug)
+                {
+                    System.out.println("Ins:");                    
+                }
                 if (InsCounter.containsKey(editMove))
                 {
                     Integer numerator = InsCounter.get(editMove);
                     Integer denominator = UniGramCounter.get(editMove.charAt(0));
                     probEdit = (numerator + 1) / ((denominator + UniGramCounter.size()) * 1.0);
+                    if (Debug)
+                    {
+                        System.out.println("numerator = " + numerator + ", denominator = " + denominator);
+                        System.out.println("probEdit =" + probEdit);
+                    }
                 }
                 else
                 {
                     probEdit = 1 / (UniGramCounter.size() * 1.0);
+                    if (Debug)
+                    {
+                        System.out.println("Key not found, probEdit =" + probEdit);
+                    }
                 }
             }
+            System.out.println("EditType = " + editType + ": " + probEdit);
             probEntire *= probEdit;
+            System.out.println("ProbEntire = " + probEntire);
         }
+        System.out.println("Final ProbEntire = "+probEntire);
         return probEntire;
     }
 }
