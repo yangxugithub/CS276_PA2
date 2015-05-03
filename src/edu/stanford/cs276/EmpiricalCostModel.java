@@ -488,7 +488,10 @@ public class EmpiricalCostModel implements EditCostModel
             String clean = lineSc.next();
             if (noisy.compareTo(clean) != 0)
             {
-                System.out.println("noisy = "+noisy + ", clean = " + clean + "\n");
+                if (Debug)
+                {
+                    System.out.println("noisy = "+noisy + ", clean = " + clean + "\n");
+                }
                 if (noisy.length() == clean.length())
                 {
                     UpdateCounterOfSubOrTrans(noisy, clean);
@@ -638,11 +641,18 @@ public class EmpiricalCostModel implements EditCostModel
                     }
                 }
             }
-            System.out.println("EditType = " + editType + ": " + probEdit);
+
             probEntire *= probEdit;
-            System.out.println("ProbEntire = " + probEntire);
+            if (Debug)
+            {
+                System.out.println("EditType = " + editType + ": " + probEdit);
+                System.out.println("ProbEntire = " + probEntire);
+            }            
         }
-        System.out.println("Final ProbEntire = "+probEntire);
+        if (Debug)
+        {
+            System.out.println("Final ProbEntire = "+probEntire);
+        }
         return probEntire;
     }
 }
