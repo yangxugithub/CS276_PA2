@@ -2,7 +2,9 @@ package edu.stanford.cs276;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -13,13 +15,16 @@ import java.util.Scanner;
 public class EmpiricalCostModel implements EditCostModel
 {
     // bigram counter
-    Map<String, Integer> BiGramCounter = new HashMap<String, Integer>();
-    Map<Character, Integer> UniGramCounter = new HashMap<Character, Integer>();
-    Map<String, Integer> DelCounter = new HashMap<String, Integer>();
-    Map<String, Integer> InsCounter = new HashMap<String, Integer>();
-    Map<String, Integer> SubCounter = new HashMap<String, Integer>();
-    Map<String, Integer> TransCounter = new HashMap<String, Integer>();
-    Integer A = CandidateGenerator.alphabet.length;
+    HashMap<String, Integer> BiGramCounter = new HashMap<String, Integer>();
+    HashMap<Character, Integer> UniGramCounter = new HashMap<Character, Integer>();
+    HashMap<String, Integer> DelCounter = new HashMap<String, Integer>();
+    HashMap<String, Integer> InsCounter = new HashMap<String, Integer>();
+    HashMap<String, Integer> SubCounter = new HashMap<String, Integer>();
+    HashMap<String, Integer> TransCounter = new HashMap<String, Integer>();
+//    Integer A =÷ CandidateGenerator.alphabet.length;
+//    String FileName = "tmpLog.txt";
+//    FileWriter LogWriter; 
+//    PrintWriter LogWriter;
     // unigrap counter
     // del counter
     // ins counter
@@ -27,6 +32,14 @@ public class EmpiricalCostModel implements EditCostModel
     // trans counter
     public void UpdateCounterOfSubOrTrans(String noisy, String clean)
     {
+//        try
+//        {
+//            LogWriter.write("noisy = "+noisy + ", clean = " + clean + "\n");
+//        } catch (IOException e)
+//        {
+//            // TODO Auto-generated catch block
+//            e.printStackTrace();
+//        }
         int i = 0;
         for (i = 0; i < noisy.length(); i++)
         {
@@ -73,14 +86,40 @@ public class EmpiricalCostModel implements EditCostModel
     // noisy is one letter longer
     public void UpdateCounterIns(String noisy, String clean)
     {
+//        try
+//        {
+//            LogWriter.write("noisy = "+noisy + ", clean = " + clean + "\n");
+//        } catch (IOException e)
+//        {
+//            // TODO Auto-generated catch block
+//            e.printStackTrace();
+//        }
         int i = 0;
         String tmpKey = "", tmpKey2 = "";
-        for (i = 0; i < noisy.length(); i++)
+        boolean found = false;
+        for (i = 0; i < clean.length(); i++)
         {
             if (noisy.charAt(i) != clean.charAt(i))
             {
+                found = true;
                 break;
             }
+        }
+        // insert is at the end of noisy
+        if (!found)
+        {
+            tmpKey += noisy.charAt(i-1);
+            tmpKey += noisy.charAt(i);
+            if (InsCounter.containsKey(tmpKey))
+            {
+                Integer tmpValue = InsCounter.get(tmpKey);
+                InsCounter.put(tmpKey, tmpValue + 1);
+            } 
+            else
+            {
+                InsCounter.put(tmpKey, 1);
+            }
+            return;
         }
         if (i - 1 >= 0)
         {
@@ -223,7 +262,7 @@ public class EmpiricalCostModel implements EditCostModel
         for (int i = 1; i <= srcLength; i++)
         {
             int DB = 0;
-            System.out.println("i = " + i);
+//            System.out.println("i = " + i);
             for (int j = 1; j <= dstLength; j++)
             {
                 int i1 = DA[dst.charAt(j - 1)];
@@ -249,20 +288,20 @@ public class EmpiricalCostModel implements EditCostModel
                 }
 
             }
-            System.out.println("---------------------------------------------");
+//            System.out.println("---------------------------------------------");
             DA[src.charAt(i - 1)] = i;
         }
 
-        for (int i = 1; i <= srcLength + 1; i++)
-        {
-            String row = "";
-            for (int j = 1; j <= dstLength + 1; j++)
-            {
-                row += Path[i][j];
-                row += ", ";
-            }
-            System.out.println(row);
-        }
+//        for (int i = 1; i <= srcLength + 1; i++)
+//        {
+//            String row = "";
+//            for (int j = 1; j <= dstLength + 1; j++)
+//            {
+//                row += Path[i][j];
+//                row += ", ";
+//            }
+//            System.out.println(row);
+//        }
 
         List<String> edits = GetEditsByBackTracking(src, dst, Path);
 
@@ -296,14 +335,14 @@ public class EmpiricalCostModel implements EditCostModel
                 // editType += dst.charAt(j - 3);
                 i -= 2;
                 j -= 2;
-                System.out.println("Trs : " + editType);
+//                System.out.println("Trs : " + editType);
                 edits.add("Trs" + editType);
             } 
             else if (Path[i][j] == "del")
             {
                 editType += src.charAt(i - 3);
                 editType += src.charAt(i - 2);
-                System.out.println("Del: " + editType);
+//                System.out.println("Del: " + editType);
                 edits.add("Del" + editType);
                 i -= 1;
             } 
@@ -311,7 +350,7 @@ public class EmpiricalCostModel implements EditCostModel
             {
                 editType += src.charAt(i - 2);
                 editType += dst.charAt(j - 2);
-                System.out.println("Ins: " + editType);
+//                System.out.println("Ins: " + editType);
                 edits.add("Ins" + editType);
 
                 if (dst.charAt(j - 2) == dst.charAt(j - 1))
@@ -319,7 +358,7 @@ public class EmpiricalCostModel implements EditCostModel
                     editType = "";
                     editType += dst.charAt(j - 2);
                     editType += dst.charAt(j - 1);
-                    System.out.println("Ins: " + editType);
+//                    System.out.println("Ins: " + editType);
                     edits.add("Ins" + editType);
                 }
                 j -= 1;
@@ -328,7 +367,7 @@ public class EmpiricalCostModel implements EditCostModel
             {
                 editType += dst.charAt(j - 2);
                 editType += src.charAt(i - 2);
-                System.out.println("sub: " + editType);
+//                System.out.println("sub: " + editType);
                 edits.add("Sub" + editType);
                 i -= 1;
                 j -= 1;
@@ -338,19 +377,19 @@ public class EmpiricalCostModel implements EditCostModel
                 // editType +=
                 i -= 1;
                 j -= 1;
-                System.out.println("match");
+//                System.out.println("match");
             } 
             else
             {
-                System.out.println("find no edit type");
-                System.out.println("i = " + i + ", j= " + j);
+//                System.out.println("find no edit type");
+//                System.out.println("i = " + i + ", j= " + j);
                 // del at head
                 if (i > 1)
                 {
                     editType += '^';
                     editType += src.charAt(0);
                     edits.add("Del" + editType);
-                    System.out.println("Del: " + editType);
+//                    System.out.println("Del: " + editType);
                 }
                 // ins at head
                 else
@@ -358,7 +397,7 @@ public class EmpiricalCostModel implements EditCostModel
                     editType += '^';
                     editType += dst.charAt(0);
                     edits.add("Ins" + editType);
-                    System.out.println("Ins: " + editType);
+//                    System.out.println("Ins: " + editType);
 
                     if (dstLength > 1 && dst.charAt(0) == dst.charAt(1))
                     {
@@ -366,7 +405,7 @@ public class EmpiricalCostModel implements EditCostModel
                         editType += dst.charAt(0);
                         editType += dst.charAt(0);
                         edits.add("Ins" + editType);
-                        System.out.println("Ins: " + editType);
+//                        System.out.println("Ins: " + editType);
                     }
                 }
                 break;
@@ -419,31 +458,36 @@ public class EmpiricalCostModel implements EditCostModel
         BufferedReader input = new BufferedReader(new FileReader(editsFile));
         System.out.println("Constructing edit distance map...");
         String line = null;
+//        LogWriter = new FileWriter(FileName, true);
+//        LogWriter.write("test");
         while ((line = input.readLine()) != null)
         {
             Scanner lineSc = new Scanner(line);
             lineSc.useDelimiter("\t");
             String noisy = lineSc.next();
             String clean = lineSc.next();
-
-            if (noisy.length() == clean.length())
+            if (noisy.compareTo(clean) != 0)
             {
-                UpdateCounterOfSubOrTrans(noisy, clean);
-            } 
-            else if (noisy.length() < clean.length())
-            {
-                UpdateCounterDel(noisy, clean);
-            } 
-            else
-            {
-                UpdateCounterIns(noisy, clean);
+    //            System.out.println("noisy = "+noisy + ", clean = " + clean + "\n");
+                if (noisy.length() == clean.length())
+                {
+                    UpdateCounterOfSubOrTrans(noisy, clean);
+                } 
+                else if (noisy.length() < clean.length())
+                {
+                    UpdateCounterDel(noisy, clean);
+                } 
+                else
+                {
+                    UpdateCounterIns(noisy, clean);
+                }
             }
-            
             UpdateUniGramCounter(clean);
             UpdateBiGramCounter(clean);
         }
 
         input.close();
+//        LogWriter.close();
         System.out.println("Done.");
     }
 
