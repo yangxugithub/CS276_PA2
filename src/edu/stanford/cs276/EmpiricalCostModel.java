@@ -14,12 +14,12 @@ public class EmpiricalCostModel implements EditCostModel
 {
     // bigram counter
     Map<String, Integer> BiGramCounter = new HashMap<String, Integer>();
-    Map<String, Integer> UniGramCounter = new HashMap<String, Integer>();
+    Map<Character, Integer> UniGramCounter = new HashMap<Character, Integer>();
     Map<String, Integer> DelCounter = new HashMap<String, Integer>();
     Map<String, Integer> InsCounter = new HashMap<String, Integer>();
     Map<String, Integer> SubCounter = new HashMap<String, Integer>();
     Map<String, Integer> TransCounter = new HashMap<String, Integer>();
-
+    Integer A = CandidateGenerator.alphabet.length;
     // unigrap counter
     // del counter
     // ins counter
@@ -196,7 +196,7 @@ public class EmpiricalCostModel implements EditCostModel
 
     // src is the candidate, the correct one
     // dst is the query, the misspelled one
-    public static List<String> getEditTypes(String src, String dst)
+    public static List<String> GetEdits(String src, String dst)
     {
         int alphabetLength = 150;
         int srcLength = src.length();
@@ -296,8 +296,8 @@ public class EmpiricalCostModel implements EditCostModel
                 // editType += dst.charAt(j - 3);
                 i -= 2;
                 j -= 2;
-                System.out.println("Trans : " + editType);
-                edits.add("Trans" + editType);
+                System.out.println("Trs : " + editType);
+                edits.add("Trs" + editType);
             } 
             else if (Path[i][j] == "del")
             {
@@ -377,6 +377,43 @@ public class EmpiricalCostModel implements EditCostModel
         return edits;
     }
 
+    public void UpdateUniGramCounter(String clean)
+    {
+        int i = 0;
+        for (i = 0; i < clean.length(); i++)
+        {
+            char tmpKey = clean.charAt(i);
+            if (UniGramCounter.containsKey(tmpKey))
+            {
+                Integer tmpValue = UniGramCounter.get(tmpKey);
+                UniGramCounter.put(tmpKey, tmpValue + 1);
+            }
+            else
+            {
+                UniGramCounter.put(tmpKey, 1);
+            }            
+        }
+    }
+    public void UpdateBiGramCounter(String clean)
+    {
+        int i = 0;
+        for (i = 0; i < clean.length()-1; i++)
+        {
+            String tmpKey = "";
+            tmpKey += clean.charAt(i);
+            tmpKey += clean.charAt(i+1);
+            if (BiGramCounter.containsKey(tmpKey))
+            {
+                Integer tmpValue = BiGramCounter.get(tmpKey);
+                BiGramCounter.put(tmpKey, tmpValue + 1);
+            }
+            else
+            {
+                BiGramCounter.put(tmpKey, 1);
+            }            
+        }
+    }
+    
     public EmpiricalCostModel(String editsFile) throws IOException
     {
         BufferedReader input = new BufferedReader(new FileReader(editsFile));
@@ -392,13 +429,18 @@ public class EmpiricalCostModel implements EditCostModel
             if (noisy.length() == clean.length())
             {
                 UpdateCounterOfSubOrTrans(noisy, clean);
-            } else if (noisy.length() < clean.length())
+            } 
+            else if (noisy.length() < clean.length())
             {
                 UpdateCounterDel(noisy, clean);
-            } else
+            } 
+            else
             {
                 UpdateCounterIns(noisy, clean);
             }
+            
+            UpdateUniGramCounter(clean);
+            UpdateBiGramCounter(clean);
         }
 
         input.close();
@@ -409,9 +451,67 @@ public class EmpiricalCostModel implements EditCostModel
     @Override
     public double editProbability(String original, String R, int distance)
     {
-        return 0.5;
-        /*
-         * Your code here
-         */
+        List<String> edits = GetEdits(R, original);
+        double probEntire = 0.0;
+        for (String edit : edits)
+        {
+            String editType = edit.substring(0, 3);
+            String editMove = edit.substring(3);
+            double probEdit = 0.0;
+            if (editType == "Trs")
+            {
+                if (TransCounter.containsKey(editMove))
+                {
+                    Integer numerator = TransCounter.get(editMove);
+                    Integer denominator = BiGramCounter.get(editMove);
+                    probEdit = (numerator + 1) / ((denominator + BiGramCounter.size()) * 1.0);
+                }
+                else
+                {
+                    probEdit = 1 / (BiGramCounter.size() * 1.0);
+                }
+            }
+            else if (editType == "Sub")
+            {
+                if (SubCounter.containsKey(editMove))
+                {
+                    Integer numerator = SubCounter.get(editMove);
+                    Integer denominator = UniGramCounter.get(editMove.charAt(1));
+                    probEdit = (numerator + 1) / ((denominator + UniGramCounter.size()) * 1.0);
+                }
+                else
+                {
+                    probEdit = 1 / (UniGramCounter.size() * 1.0);
+                }
+            }
+            else if (editType == "Del")
+            {
+                if (DelCounter.containsKey(editMove))
+                {
+                    Integer numerator = DelCounter.get(editMove);
+                    Integer denominator = BiGramCounter.get(editMove);
+                    probEdit = (numerator + 1) / ((denominator + BiGramCounter.size()) * 1.0);
+                }
+                else
+                {
+                    probEdit = 1 / (BiGramCounter.size() * 1.0);
+                }
+            }
+            else if (editType == "Ins")
+            {
+                if (InsCounter.containsKey(editMove))
+                {
+                    Integer numerator = InsCounter.get(editMove);
+                    Integer denominator = UniGramCounter.get(editMove.charAt(0));
+                    probEdit = (numerator + 1) / ((denominator + UniGramCounter.size()) * 1.0);
+                }
+                else
+                {
+                    probEdit = 1 / (UniGramCounter.size() * 1.0);
+                }
+            }
+            probEntire *= probEdit;
+        }
+        return probEntire;
     }
 }
