@@ -10,8 +10,8 @@ public class UniformCostModel implements EditCostModel
 //        '0','1','2','3','4','5','6','7','8','9',
 //        ' ',','};
     
-    public static final double ProbDiff = 0.01;
-    public static final double ProbSame = 0.95;
+    public static final double ProbDiff = Config.ProbDiff;
+    public static final double ProbSame = Config.ProbSame;
     public static int getMinValue(int... nums)
     {
 //        int min = Integer.MAX_VALUE;
