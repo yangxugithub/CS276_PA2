@@ -22,7 +22,7 @@ public class EmpiricalCostModel implements EditCostModel
     HashMap<String, Integer> SubCounter = new HashMap<String, Integer>();
     HashMap<String, Integer> TransCounter = new HashMap<String, Integer>();
     
-    boolean Debug = true;
+    boolean Debug = false;
 //    Integer A =÷ CandidateGenerator.alphabet.length;
 //    String FileName = "tmpLog.txt";
 //    FileWriter LogWriter; 
@@ -592,7 +592,7 @@ public class EmpiricalCostModel implements EditCostModel
                 }
                 if (DelCounter.containsKey(editMove))
                 {
-                    System.out.println("    Found key");
+//                    System.out.println("    Found key");
                     Integer numerator = DelCounter.get(editMove);
                     Integer denominator = BiGramCounter.get(editMove);
                     probEdit = (numerator + 1) / ((denominator + BiGramCounter.size()) * 1.0);
@@ -604,7 +604,7 @@ public class EmpiricalCostModel implements EditCostModel
                 }
                 else
                 {
-                    System.out.println("    Key not found");
+//                    System.out.println("    Key not found");
                     probEdit = 1 / (BiGramCounter.size() * 1.0);
                     if (Debug)
                     {
