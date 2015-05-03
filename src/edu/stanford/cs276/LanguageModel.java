@@ -25,9 +25,12 @@ import edu.stanford.cs276.util.Pair;
  */
 public class LanguageModel implements Serializable {
 
-	private static final int WORDEDITDIST = 1;
+	
+	private static float unigramSmoothing = Config.unigramSmoothing;
+	
+	private static final int WORDEDITDIST = Config.wordEditDistance;
 
-	private static int THRESHOLD = 1;
+	private static int THRESHOLD = Config.DeenominatorThreshold;
 
 	private static LanguageModel lm_;
 
@@ -102,6 +105,7 @@ public class LanguageModel implements Serializable {
 	public double getUnigramProbability(String token) {
 		boolean b = unigram.containsKey(tokenDict.get(token));
 		
+//		double result = ((b?(double)unigram.get(tokenDict.get(token)).intValue()+1.0d:0.0d)+1)/(T+1);
 		double result = (b?(double)unigram.get(tokenDict.get(token)).intValue()+1:1)/(T+1);
 		return result;
 	}
@@ -152,7 +156,7 @@ public class LanguageModel implements Serializable {
 			}
 			input.close();
 		}
-		createRevDict();
+//		createRevDict();
 		System.out.println("Done.");
 	}
 
@@ -162,7 +166,7 @@ public class LanguageModel implements Serializable {
 		return b;
 	}
 
-	private void createRevDict() {
+	public void createRevDict() {
 		tokenDict.forEach((k,v)->{
 			revTokenDict.put(v, k);
 		});

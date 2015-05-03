@@ -14,8 +14,8 @@ import java.util.TreeSet;
 public class CandidateGenerator implements Serializable {
 
 
-	private static final float LAMBDA = 0.01f;
-	public static final double param = 1.0d;
+	private static final float LAMBDA = Config.LAMBDA;
+	public static final double param = Config.MU;
 
 	private static CandidateGenerator cg_;
 
@@ -57,6 +57,7 @@ public class CandidateGenerator implements Serializable {
 //		Map<String, Object> spaceInsert = handleSpaceInserts(query, spaceDelete, candidates, lm, tokens);
 
 		return (String) spaceDelete.get("query");
+//		return (String) spaceInsert.get("query");
 		//		return str1;
 	}
 

@@ -12,26 +12,19 @@ public class RunCorrector {
 
 	public static void main1(String[] args) throws Exception {
 		boolean b = true;
-		
-		
+
 		while(b) {
-//			
 			BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 			String input;
-//			
 			while((input=br.readLine())!=null){
 				if(input.endsWith("c")) 
 					b = false;
 				RunCorrector.main1(args);
 			}
-			
-			
 		}
-		
-//		Thread.sleep(10*1000);
 	}
-	
-	
+
+
 
 	public static void main(String[] args) throws Exception {
 
@@ -82,6 +75,7 @@ public class RunCorrector {
 
 		// Load models from disk
 		languageModel = LanguageModel.load(); 
+		languageModel.createRevDict();
 		nsm = NoisyChannelModel.load();
 		BufferedReader queriesFileReader = new BufferedReader(new FileReader(new File(queryFilePath)));
 		nsm.setProbabilityType(uniformOrEmpirical);
@@ -132,11 +126,8 @@ public class RunCorrector {
 		CandidateGenerator cg;
 		try {
 			String result = null;
-
-//			if(query.contains("mw")) {
-				cg = CandidateGenerator.get();
-				result = cg.getCorrectedQuery(query); 
-//			}
+			cg = CandidateGenerator.get();
+			result = cg.getCorrectedQuery(query); 
 			return (result==null||result.length()==0)?query:result.trim();
 
 		} catch (Exception e) {
