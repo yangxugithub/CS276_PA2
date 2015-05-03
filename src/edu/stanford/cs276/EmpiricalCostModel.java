@@ -458,6 +458,18 @@ public class EmpiricalCostModel implements EditCostModel
                 BiGramCounter.put(tmpKey, 1);
             }            
         }
+        String tmpKey = "";
+        tmpKey += '^';
+        tmpKey += clean.charAt(0);
+        if (BiGramCounter.containsKey(tmpKey))
+        {
+            Integer tmpValue = BiGramCounter.get(tmpKey);
+            BiGramCounter.put(tmpKey, tmpValue + 1);
+        }
+        else
+        {
+            BiGramCounter.put(tmpKey, 1);
+        } 
     }
     
     public EmpiricalCostModel(String editsFile) throws IOException
@@ -467,6 +479,7 @@ public class EmpiricalCostModel implements EditCostModel
         String line = null;
 //        LogWriter = new FileWriter(FileName, true);
 //        LogWriter.write("test");
+        int index = 0;
         while ((line = input.readLine()) != null)
         {
             Scanner lineSc = new Scanner(line);
@@ -489,10 +502,11 @@ public class EmpiricalCostModel implements EditCostModel
                     UpdateCounterIns(noisy, clean);
                 }
             }
+            index += 1;
             UpdateUniGramCounter(clean);
             UpdateBiGramCounter(clean);
         }
-
+        UniGramCounter.put('^', index);
         input.close();
 //        LogWriter.close();
         System.out.println("Done.");
@@ -574,25 +588,27 @@ public class EmpiricalCostModel implements EditCostModel
             {
                 if (Debug)
                 {
-                    System.out.println("Del:");                    
+                    System.out.println("  Del:");                    
                 }
                 if (DelCounter.containsKey(editMove))
                 {
+                    System.out.println("    Found key");
                     Integer numerator = DelCounter.get(editMove);
                     Integer denominator = BiGramCounter.get(editMove);
                     probEdit = (numerator + 1) / ((denominator + BiGramCounter.size()) * 1.0);
                     if (Debug)
                     {
-                        System.out.println("numerator = " + numerator + ", denominator = " + denominator);
-                        System.out.println("probEdit =" + probEdit);
+                        System.out.println("    numerator = " + numerator + ", denominator = " + denominator);
+                        System.out.println("    probEdit =" + probEdit);
                     }
                 }
                 else
                 {
+                    System.out.println("    Key not found");
                     probEdit = 1 / (BiGramCounter.size() * 1.0);
                     if (Debug)
                     {
-                        System.out.println("Key not found, probEdit =" + probEdit);
+                        System.out.println("    Key not found, probEdit =" + probEdit);
                     }
                 }
             }
