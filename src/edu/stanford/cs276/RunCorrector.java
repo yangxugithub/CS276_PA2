@@ -3,6 +3,8 @@ package edu.stanford.cs276;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.io.InputStreamReader;
 
 public class RunCorrector {
@@ -114,13 +116,37 @@ public class RunCorrector {
 			}
 			System.out.println(correctedQuery);
 		}
+		
+		
+		
 		queriesFileReader.close();
 		long endTime   = System.currentTimeMillis();
 		long totalTime = endTime - startTime;
-		System.out.println("RUNNING TIME: "+totalTime/1000+" seconds ");
-		System.out.println(100.0d * yourCorrectCount / totalCount);
+		if(Config.analyzeCandGeneration) {
+			analyze(totalTime, 100.0d * yourCorrectCount / totalCount);
+		}
+//		System.out.println("RUNNING TIME: "+totalTime/1000+" seconds ");
+//		System.out.println(100.0d * yourCorrectCount / totalCount);
 	}
 
+
+	private static void analyze(long totalTime, double d) {
+		FileWriter fw = null;
+		try {
+			fw = new FileWriter(new File(Config.analysisFile));
+			fw.write("======================================================\n");
+			fw.write("Total Candidate tokens processed: " + CandidateGenerator.totalTokenCandidates + "\n");
+			fw.write("Total Query Candidates processed: " + CandidateGenerator.totalQueryCandidates + "\n");
+			fw.write("RUNNING TIME: "+totalTime/1000+" seconds " + "\n");
+			fw.write("Accuracy: " + d + "\n");
+		} catch (IOException e) {
+		} finally {
+			try {
+				fw.close();
+			} catch (IOException e) {
+			}
+		}
+	}
 
 	private static String getCorrectedQuery(String query) {
 		CandidateGenerator cg;
