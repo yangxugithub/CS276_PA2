@@ -93,6 +93,8 @@ public class CandidateGenerator implements Serializable {
 							s.append(str+" ");
 						});
 						
+						totalTokenCandidates  = totalTokenCandidates + tokens.length;
+						
 						Map<String, Set<String>> candidateCopy = populateCandidateMap(candidates,tokens,lm);
 						
 						String str3 = getCartesianProducts(candidateCopy, new String [candidateCopy.size()], 0, tokens, s.toString().trim());

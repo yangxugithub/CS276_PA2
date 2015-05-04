@@ -482,10 +482,13 @@ public class EmpiricalCostModel implements EditCostModel
         int index = 0;
         while ((line = input.readLine()) != null)
         {
-            Scanner lineSc = new Scanner(line);
-            lineSc.useDelimiter("\t");
-            String noisy = lineSc.next();
-            String clean = lineSc.next();
+//            Scanner lineSc = new Scanner(line);
+//            lineSc.useDelimiter("\t");
+        	String [] arr = line.split("\t");
+//            String noisy = lineSc.next();
+//            String clean = lineSc.next();
+        	String noisy = arr[0];
+        	String clean = arr[1];
             if (noisy.compareTo(clean) != 0)
             {
                 if (Debug)
